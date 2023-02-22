@@ -2,7 +2,7 @@ import { useState, useEffect } from "react";
 // import { API_KEY } from "react-native-dotenv";
 import axios from "axios";
 import { storeWeather, getWeather } from "./storeWeather";
-import useGeoLocation from "./useGeoLocation";
+import useLocation from "./useLocation";
 
 const API_KEY = 'b07ce6c8a93a606ff7222b11ce82d280';
 
@@ -17,7 +17,7 @@ const callAPI = axios.create({
 export default function useWeather(lat, lon) {
   const [weather, setWeather] = useState(null);
 
-  const latLon = useGeoLocation();
+  const latLon = useLocation();
 
   useEffect(() => {
     if (latLon) {
