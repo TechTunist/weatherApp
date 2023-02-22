@@ -1,5 +1,5 @@
 import React, { useState, useCallback, useEffect } from "react";
-import { Button, StyleSheet, View, Text, ImageBackground, TextInput, Image } from 'react-native';
+import { Button, StyleSheet, View, Text, ImageBackground, TextInput, Image, ActivityIndicator } from 'react-native';
 import useWeather from "./utils/useWeather";
 import searchWeather from "./utils/searchWeather";
 import Loading from "./components/Loading";
@@ -41,7 +41,7 @@ function LocalWeatherScreen({navigation}) {
     <Container>
       <Button
         title='Search for weather in another location'
-        onPress={() => navigation.navigate('searchWeather')}/>
+        onPress={() => navigation.navigate('SearchWeather')}/>
       {!weather ? <Loading /> : <Weather forecast={weather} />}
     </Container>
   )
@@ -120,6 +120,14 @@ function SearchWeatherScreen() {
           style={styles.textInput}
           onSubmitEditing={fetchDataHandler}
         />
+        {loading && (
+        <View>
+          <ActivityIndicator
+            size={'large'}
+            color={'black'}
+          />
+        </View>
+        )}
           <View style={styles.infoView}>
             
             <Text style={styles.dateText}>
@@ -145,6 +153,15 @@ function SearchWeatherScreen() {
           style={styles.textInput}
           onSubmitEditing={fetchDataHandler}
         />
+        {loading && (
+        <View>
+          <ActivityIndicator
+            size={'large'}
+            color={'black'}
+          />
+        </View>
+        )}
+        {data && (
           <View style={styles.infoView}>
             <Text style={styles.cityCountryText}>
               {`${data?.name}, ${data?.sys?.country}`}
@@ -162,6 +179,7 @@ function SearchWeatherScreen() {
               {new Date().toLocaleDateString()}
             </Text>
           </View>
+        )}
         </ImageBackground>
       </View>
     );
@@ -174,10 +192,8 @@ export default function App() {
   return (
     <NavigationContainer>
       <Stack.Navigator>
-        {/* <Stack.Screen name='Home' component={HomeScreen}/>
-        <Stack.Screen name='Details' component={DetailsScreen}/> */}
         <Stack.Screen name='LocalWeather' component={LocalWeatherScreen}/>
-        <Stack.Screen name='searchWeather' component={SearchWeatherScreen}/>
+        <Stack.Screen name='SearchWeather' component={SearchWeatherScreen}/>
       </Stack.Navigator>
     </NavigationContainer>
     

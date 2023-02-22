@@ -6,11 +6,45 @@ import axios from 'axios';
 
 export default function searchWeather() {
 
+  const [location, setLocation] = useState(null);
+  const [errorMsg, setErrorMsg] = useState(null);
+
   const [input, setInput] = useState("");
   const [loading, setLoading] = useState(false);
   const [data, setData] = useState([]);
 
   const api = 'b07ce6c8a93a606ff7222b11ce82d280';
+
+  // useEffect is a hook that runs after the component is rendered
+  useEffect(() => {
+    (async() => {
+      let {status} = await Location.requestForegroundPermissionsAsync();
+      if (status !== 'granted') {
+        setErrorMsg('Permission denied');
+        return;
+      }
+
+      let loc = await Location.getCurrentPositionAsync({});
+
+      fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${loc.coords.latitude}&lon=${loc.coords.longitude}&appid=b07ce6c8a93a606ff7222b11ce82d280`, {
+        method: 'POST',
+        headers: {
+          Accept: 'application/json',
+          'Content-Type': 'application/json'
+        }
+      })
+      .then((response) => response.json())
+      .then((json) => {
+        // console.log(json);
+        setLocation(json);
+        setData(json);
+        // console.log(location);
+      })
+      .catch((error) => {
+        console.log(error);
+      });
+    })();
+  }, []);
 
   const fetchDataHandler = useCallback(() => {
     setLoading(true);
@@ -27,55 +61,68 @@ export default function searchWeather() {
     .finally(() => setLoading(false));
   }, [input, api]);
 
-  console.log(data);
-  console.log(input);
 
-  return (
-    <View style={styles.container}>
-      <ImageBackground
-        source={require('../assets/Android-rain.jpg')}
-        resizeMode="cover"
-        style={styles.image}>
-      <TextInput
-        placeholder='Enter location'
-        onChangeText={text => setInput(text)}
-        value={input}
-        placeholderTextColor={'#000'}
-        style={styles.textInput}
-        onSubmitEditing={fetchDataHandler}
-      />
-      {loading && (
-      <View>
-        <ActivityIndicator
-          size={'large'}
-          color={'black'}
+  if (data == null) {
+    return (
+      <View style={styles.container}>
+        <ImageBackground
+          source={require('../assets/Android-rain.jpg')}
+          resizeMode="cover"
+          style={styles.image}>
+        <TextInput
+          placeholder='Enter location'
+          onChangeText={text => setInput(text)}
+          value={input}
+          placeholderTextColor={'#000'}
+          style={styles.textInput}
+          onSubmitEditing={fetchDataHandler}
         />
+          <View style={styles.infoView}>
+            
+            <Text style={styles.dateText}>
+              {new Date().toLocaleDateString()}
+            </Text>
+          </View>
+        </ImageBackground>
       </View>
-      )}
-      {data && (
-        <View style={styles.infoView}>
-          <Text style={styles.cityCountryText}>
-            {`${data?.name}, ${data?.sys?.country}`}
-          </Text>
-          <Text style={styles.cityCountryText}>
-            {`${Math.round((data?.main?.temp - 273.15) * 10) / 10}°C`}
-          </Text>
-          <Image
-            source={{
-              uri:`http://openweathermap.org/img/wn/${data?.weather[0].icon}.png`
-            }}
-            style={{width: 100, height: 100}}
-          />
-          <Text style={styles.dateText}>
-            {new Date().toLocaleDateString()}
-          </Text>
-        </View>
-        )}
-      <StatusBar style="auto" />
-      
-      </ImageBackground>
-    </View>
-  );
+    );
+  }
+  else {
+    return (
+      <View style={styles.container}>
+        <ImageBackground
+          source={require('../assets/Android-rain.jpg')}
+          resizeMode="cover"
+          style={styles.image}>
+        <TextInput
+          placeholder='Enter location'
+          onChangeText={text => setInput(text)}
+          value={input}
+          placeholderTextColor={'#000'}
+          style={styles.textInput}
+          onSubmitEditing={fetchDataHandler}
+        />
+          <View style={styles.infoView}>
+            <Text style={styles.cityCountryText}>
+              {`${data?.name}, ${data?.sys?.country}`}
+            </Text>
+            <Text style={styles.cityCountryText}>
+              {`${Math.round((data?.main?.temp - 273.15) * 10) / 10}°C`}
+            </Text>
+            {/* <Image
+              source={{
+                uri:`http://openweathermap.org/img/wn/${data?.weather[0]?.icon}.png`
+              }}
+              style={{width: 100, height: 100}}
+            /> */}
+            <Text style={styles.dateText}>
+              {new Date().toLocaleDateString()}
+            </Text>
+          </View>
+        </ImageBackground>
+      </View>
+    );
+  }
 }
 
 const styles = StyleSheet.create({
